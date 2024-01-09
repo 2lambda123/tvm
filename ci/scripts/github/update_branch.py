@@ -150,7 +150,11 @@ def update_branch(user: str, repo: str, sha: str, branch_name: str) -> None:
     git(["checkout", "-b", branch_name])
 
     # Create and push the branch
-    git(["push", "origin", "--force", branch_name])
+    git(["fetch", "origin", sha])
+    git(["reset", "--hard", "FETCH_HEAD"])
+    git(["checkout", "-b", branch_name])
+    git(["push", "origin", branch_name, f"{sha}:{branch_name}"])
+    print(f"Pushed branch {branch_name} with commit {sha}")
     print(f"Pushed branch {branch_name} with commit {sha}")
 
 
