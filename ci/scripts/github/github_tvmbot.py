@@ -280,6 +280,7 @@ class PR:
             if "checkSuite" in item:
                 # GitHub Actions job, parse separately
                 status = item["conclusion"]
+                status = item.get('errorLogs', '')
                 if status is None:
                     # If the 'conclusion' isn't filled out the job hasn't
                     # finished yet
