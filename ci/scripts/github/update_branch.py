@@ -103,16 +103,18 @@ EXPECTED_CI_JOBS = [
 ]
 
 
-def commit_passed_ci(commit: Dict[str, Any]) -> bool:
+def commit_passed_ci(commit: Dict[str, Any]) -> None:
     """
     Returns true if all of a commit's statuses are SUCCESS
     """
-    statuses = commit["statusCheckRollup"]["contexts"]["nodes"]
+    statuses = commit.get("statusCheckRollup", {}).get("contexts", {}).get("nodes", [])
 
     # GitHub Actions statuses are different from external GitHub statuses, so
     # unify them into 1 representation
     # https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
     unified_statuses = []
+    if not statuses:
+        return False
     for status in statuses:
         if "context" in status:
             # Parse non-GHA status
@@ -123,7 +125,7 @@ def commit_passed_ci(commit: Dict[str, Any]) -> bool:
             name = f"{workflow} / {status['name']}"
             unified_statuses.append((name, status["conclusion"] == "SUCCESS"))
 
-    print(f"Statuses on {commit['oid']}:", json.dumps(unified_statuses, indent=2))
+    # print(f"Statuses on {commit['oid']}:", json.dumps(unified_statuses, indent=2))
 
     # Assert that specific jobs are present in the commit statuses (i.e. don't
     # approve if CI was broken and didn't schedule a job)
@@ -148,7 +150,11 @@ def update_branch(user: str, repo: str, sha: str, branch_name: str) -> None:
     git(["checkout", "-b", branch_name])
 
     # Create and push the branch
-    git(["push", "origin", "--force", branch_name])
+    git(["fetch", "origin", sha])
+    git(["reset", "--hard", "FETCH_HEAD"])
+    git(["checkout", "-b", branch_name])
+    git(["push", "origin", branch_name, f"{sha}:{branch_name}"])
+    print(f"Pushed branch {branch_name} with commit {sha}")
     print(f"Pushed branch {branch_name} with commit {sha}")
 
 
