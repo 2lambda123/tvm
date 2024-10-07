@@ -34,18 +34,18 @@
 default_language_version:
     python: python3.6
 fail_fast: True
-default_stages: [push]
+default_stages: [Nonepre-pushNone]
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.6.0
+      rev: v5.0.0
       hooks:
         - id: check-added-large-files
         - id: check-merge-conflict
         - id: check-yaml
         - id: end-of-file-fixer
-          stages: [push]
+          stages: [Nonepre-pushNone]
         - id: trailing-whitespace
-          stages: [push]
+          stages: [Nonepre-pushNone]
     - repo: local
       hooks:
         -   id: run-black
